@@ -1,0 +1,22 @@
+[
+    {
+        "id": "1",
+        "nombre": "Recuperación de Credencial",
+        "path": "./template/cambioContraseña.html"
+    },
+    {
+        "id": "2",
+        "nombre": "Registro Bienvenido",
+        "path": "./template/registro.html"
+    },
+    {
+        "id": "3",
+        "nombre": "Respuesta Seguimiento",
+        "path": "./template/respuestaCargada.html"
+    },
+    {
+        "id": "4",
+        "nombre": "Respuesta Pago",
+        "path": "./template/pagoRecibido.html"
+    }
+]

@@ -1,0 +1,14 @@
+[
+    {
+        "nombre": "CEDULA CIUDADANIA",
+        "codigo": "CC"
+    },
+    {
+        "nombre": "TARJETA IDENTIDAD",
+        "codigo": "TI"
+    },
+    {
+        "nombre": "PASAPORTE",
+        "codigo": "PA"
+    }
+]

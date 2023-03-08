@@ -1,0 +1,36 @@
+@api = http://localhost:4000/login
+
+### Listar Plan
+GET  {{api}}/plan
+
+
+#### Crear Usuarios
+
+POST {{api}}/register
+Content-Type: application/json
+
+{
+    "primer_nombre":"ivan",
+    "segundo_nombre":"dario",
+    "primer_apellido":"acuñla",
+    "segundo_apellido":"palacio",
+    "fecha_nacimiento":"1995-02-28",
+    "tipo_documento":"CC",
+    "num_documento":"3258565252",
+    "email":"jairmolina51@gmail.com",
+    "telefono":"3003010000",
+    "genero":"M",
+    "password":"Junior1924*",
+    "plan_id":"1",
+    "peso":"100",
+    "estatura":"190",
+    "talla_cintura":"25",
+    "talla_cadera":"21"
+}
+
+
+
+### Listar Perfil
+
+
+GET  {{api}}/profile
