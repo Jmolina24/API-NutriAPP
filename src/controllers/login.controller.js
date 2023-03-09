@@ -119,7 +119,7 @@ export const changePassordController = async (req, res) => {
             await pool.end();
         })
     } catch (error) {
+        console.log(error)
         res.status(500).send(error);
     }
-    pool.end();
 }
