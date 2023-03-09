@@ -1,5 +1,4 @@
 const morgan = require('morgan');
-const serveIndex = require('serve-index')
 import express from 'express';
 import config from './config';
 import indexRouter from './routes/index.routes';

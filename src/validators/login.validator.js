@@ -68,9 +68,6 @@ const validateRegisterNew = [
     .matches(/[!@#$%^&*(),.?":{}|<>]/)
     .withMessage("Your password should have at least one sepcial character"),
 
-
-
-
   check('plan_id')
     .exists()
     .isNumeric()

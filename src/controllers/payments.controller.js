@@ -21,9 +21,9 @@ export const createOrderPayments = async (req, res) => {
             ]
         },
         back_urls: {
-            "success": `http://localhost:4000/api/v1/payments/${id_web}/notificationPayment`,
-            "failure": `http://localhost:4000/api/v1/payments/${id_web}/notificationPayment`,
-            "pending": `http://localhost:4000/api/v1/payments/${id_web}/notificationPayment`,
+            "success": `https://api-nutriapp.fly.dev/api/v1/payments/${id_web}/notificationPayment`,
+            "failure": `https://api-nutriapp.fly.dev/api/v1/payments/${id_web}/notificationPayment`,
+            "pending": `https://api-nutriapp.fly.dev/api/v1/payments/${id_web}/notificationPayment`,
         },
         auto_return: "approved"
     };
