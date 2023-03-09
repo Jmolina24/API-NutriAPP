@@ -1,8 +1,8 @@
+const { verifyTokeAuth } = require('../middleware/tokeAuth');
 import { Router } from 'express';
-import{ tipoDocumentoController, generoController, listPlanActivoController } from '../controllers/option.controller';
+import{ tipoDocumentoController, generoController, listPlanActivoController, listCustomerController } from '../controllers/option.controller';
 
 const router = Router()
-
 
 // tipo documentos
 router.get('/tipoDocumentos', tipoDocumentoController)
@@ -12,6 +12,9 @@ router.get('/generos', generoController)
 
 // planes
 router.get('/plan/:estado', listPlanActivoController)
+
+// Listado CLientes
+router.get('/listCustomer', verifyTokeAuth, listCustomerController)
 
 
 

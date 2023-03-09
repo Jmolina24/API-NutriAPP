@@ -13,10 +13,15 @@ export const queriesProfile = {
     listHistorialIMCUser: "call p_g_historial_imc_pg(?)",
     createSeguimientoUser: "call p_r_seguimiento (?,?,?,?,?,?,?,?)",
     listSeguimientosPendientes: "call p_l_seguimientos_pendientes",
-    respondeSeguimiento: "call p_responde_seguimiento(?,?,?)"
+    respondeSeguimiento: "call p_responde_seguimiento(?,?,?)",
+    p_marca_user_pago: "call p_marca_user_pago(?,?)"
 };
 
 export const queriesPayment = {
     p_registra_pago: "call p_registra_pago(?,?,?,?,?,?,?,?)",
     p_notifica_pago: "call p_notifica_pago(?)"
+}
+
+export const queriesAdmin = {
+    p_listar_customer: "call p_l_clientes()"
 }

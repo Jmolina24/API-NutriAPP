@@ -621,14 +621,76 @@ module.exports = {
       }
     },
 
+    "/api/v1/profile/user-paymet": {
+      post: {
+        tags: ["Profile"],
+        summary: "Permite marcar al cliente para el pago (Síncrona)",
+        parameters: [
+          {
+            name: "tsec",
+            in: "header",
+            description: "Authentication token",
+            schema: {
+              type: "string"
+            },
+            required: true
+          }
+        ],
+        requestBody: {
+          description: "Request",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/UserPaymetResponseDto"
+              },
+            }
+          }
+        },
+        responses: {
+          200: {
+            description: "Respuesta por BD",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/LoginRegisterRto"
+                }
+              }
+            }
+          },
+          400: {
+            description: "Errores por la BD",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/LoginError"
+                }
+              }
+            }
+          },
+          500: {
+            description: "Error servidor bad request",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorBadRequest"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
+
     "/api/v1/upload/files": {
       post: {
         tags: ["Upload"],
         summary: "Permite cargar los soportes del registros a NutriAPP  (Síncrona)",
-       requestBody: {
+        requestBody: {
           description: "A zip file containing files that will be unzipped",
           content: {
-            "multipart/form-data":{
+            "multipart/form-data": {
               schema: {
                 $ref: "#/components/schemas/UpdadaFileResponseDto"
               },
@@ -834,6 +896,50 @@ module.exports = {
         }
       }
     },
+    "/api/v1/option/listCustomer": {
+      get: {
+        tags: ["Option"],
+        summary: "Permite listar todos los clientes de Nutriapp (Síncrona)",
+        parameters: [
+          {
+            name: "tsec",
+            in: "header",
+            description: "Authentication token",
+            schema: {
+              type: "string"
+            },
+            required: true
+          }
+        ],
+        responses: {
+          200: {
+            description: "Listar todos los clientes",
+            content: {
+              "application/json": {
+                schema: {
+                  type: "array",
+                  items: {
+                    $ref: "#/components/schemas/OptionListClientesRto"
+                  }
+                }
+              },
+            }
+          },
+          500: {
+            description: "Error servidor bad request",
+            content: {
+              "application/json": {
+                schema: {
+                  $ref: "#/components/schemas/ErrorBadRequestOption"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+
+
   }
 };
 

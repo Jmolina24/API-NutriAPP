@@ -219,6 +219,20 @@ module.exports = {
         }
       },
 
+      UserPaymetResponseDto: {
+        properties: {
+          id: {
+            type: "string",
+            nullable: false
+          },
+          marca: {
+            type: "string",
+            nullable: false
+          }
+        }
+      },
+
+
       UpdadaFileResponseDto: {
         type: "object",
         properties: {
@@ -291,6 +305,8 @@ module.exports = {
         }
       },
 
+
+      
       UpdateFileRto: {
         type: "object",
         properties: {
@@ -635,6 +651,30 @@ module.exports = {
         }
       },
 
+      OptionListClientesRto: {
+        properties: {
+          nombre: {
+            type: "string",
+            nullable: false
+          },
+          edad: {
+            type: "integer",
+            nullable: false
+          },
+          celular: {
+            type: "string",
+            nullable: false
+          },
+          user_id: {
+            type: "integer",
+            nullable: false
+          },
+          progreso: {
+            type: "integer",
+            nullable: false
+          },                    
+        }
+      },
       ErrorBadRequestOption: {
         type: "object",
         properties: {
