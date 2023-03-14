@@ -1,4 +1,4 @@
-import { queriesAdmin, getConnectionBD } from '../database';
+import { queriesAdmin, queriesLogin,getConnectionBD } from '../database';
 
 const tipoDocumentos = require('../json/tipoDocumentos.json');
 const generos = require('../json/generos.json');
@@ -36,6 +36,7 @@ export const listPlanActivoController = async (req, res) => {
         })
 
     } catch (error) {
+        console.log(error)
         res.status(500).send(error);
     }
 

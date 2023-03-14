@@ -52,7 +52,9 @@ export const notificationOrderPayment = async (req, res) => {
                 if (status == 'approved') {
                     res.redirect(`/api/v1/payments/${payment_id}/Payment`);
                 } else {
-                    res.status(409).send('Pago se encuentra rechazado, por favor validar nuevamente');
+                    res.redirect('https://nutriapp.jaimarphysique.com/#/dashboard/user/profile');
+                    // res.status(409).send('Pago se encuentra rechazado, por favor validar nuevamente');
+                    console.log('Pago se encuentra rechazado, por favor validar nuevamente');
                 }
             })
     } catch (error) {
@@ -71,7 +73,7 @@ export const PaymentController = async (req, res) => {
             let result = rows[0][0];
             let data = { email: result.correo, tiempo: result.tiempo, valor: result.valor, nombre_plan: result.nombre_plan, fecha_pago: result.fecha_pago, id_transaccion: result.payment_id, id: "4" }
             mailer.SendMailElectronic(data);
-            res.redirect('https://www.google.com');
+            res.redirect('https://nutriapp.jaimarphysique.com/#/dashboard/user/profile');
             console.log('Pago Realizado con EL Payment_Id: ' + payment_id);
         })
 

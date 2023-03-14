@@ -236,7 +236,7 @@ module.exports = {
       UpdadaFileResponseDto: {
         type: "object",
         properties: {
-          file: {
+          files: {
             type: "files",
             format: "binary",
           }
