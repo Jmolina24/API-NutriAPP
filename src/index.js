@@ -1,7 +1,4 @@
 import app from './app';
-const { Client } = require('basic-ftp');
-
-
 
 app.listen(app.get('port'))
 

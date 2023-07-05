@@ -46,6 +46,8 @@ export const signController = async (req, res) => {
         pool.execute(queriesLogin.sign, [usuario, password], async function (err, rows, fields) {
             if (err) { res.status(511).send({mensaje: "Error Query BD", codigo: "1", mensaje_bd: err }); }
             const result = rows[0][0];
+            console.log(result);
+            console.log(result.codigo);
             switch (result.codigo) {
                 case 0:
                     const tokenSession = await tokenSign(result.id);
@@ -104,6 +106,7 @@ export const changePassordController = async (req, res) => {
         pool.execute(queriesLogin.changePassword, [user_id, clave_nueva], async function (err, rows, fields) {
             if (err) { return res.status(511).send({mensaje: "Error Query BD", codigo: "1", mensaje_bd: err }); }
             const result = rows[0][0];
+
             switch (result.codigo) {
                 case 0:
                     res.status(200).send(result);
