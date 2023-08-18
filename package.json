@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
-  "type": "commonjs",
   "scripts": {
     "dev": "nodemon src/index.js --exec babel-node",
-    "start": "nodemon src/index.js --exec babel-node"
+    "build": "babel src -d dist",
+    "start": "node dist"
   },
   "keywords": [],
   "author": "",
