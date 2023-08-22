@@ -3,6 +3,36 @@ import { queriesAdmin, queriesLogin,getConnectionBD } from '../database';
 const tipoDocumentos = require('../json/tipoDocumentos.json');
 const generos = require('../json/generos.json');
 
+// const tipoDocumentos = [
+//     {
+//         "nombre": "CEDULA CIUDADANIA",
+//         "codigo": "CC"
+//     },
+//     {
+//         "nombre": "TARJETA IDENTIDAD",
+//         "codigo": "TI"
+//     },
+//     {
+//         "nombre": "PASAPORTE",
+//         "codigo": "PA"
+//     }
+// ];
+
+// const generos = [
+//     {
+//         "nombre": "MASCULINO",
+//         "codigo": "M"
+//     },
+//     {
+//         "nombre": "FEMENINO",
+//         "codigo": "F"
+//     },
+//     {
+//         "nombre": "NO ESPECIFICA",
+//         "codigo": "N"
+//     }
+// ];
+
 export const tipoDocumentoController = async (req, res) => {
     try {
         res.send(tipoDocumentos);
