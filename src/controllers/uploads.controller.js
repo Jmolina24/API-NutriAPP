@@ -19,14 +19,14 @@ export const updateController = async (req, res) => {
             const readStream = fs.createReadStream(file.path);
             switch (extension) {
                 case '.pdf':
-                    var remotoDirFTP = '/uploads/seguimientos/' + serverFilename;
+                    var remotoDirFTP = '/uploads/' + serverFilename;
                     break;
                 case '.jpg':
                 case '.jpeg':
                 case '.png':
                 case '.tif':
                 case '.tiff':
-                    var remotoDirFTP = '/uploads/registration/' + serverFilename;
+                    var remotoDirFTP = '/uploads/' + serverFilename;
                     break;
                 default:
                     var remotoDirFTP = '/uploads/' + serverFilename;
