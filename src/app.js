@@ -9,6 +9,9 @@ import uploadRouter from './routes/upload.routes';
 import optionRouter from './routes/option.routes';
 import paymentsRouter from './routes/payments.routes';
 
+import bajoCeroRouter from './routes/bajo-cero.routes';
+
+
 
 
 const cors = require('cors')
@@ -25,6 +28,7 @@ app.use(express.urlencoded({ extended: false }));
 app.use(express.static(config.express_static));
 app.use(cors())
 app.use(indexRouter);
+app.use('/api/v1/bajo-cero', bajoCeroRouter);
 app.use('/api/v1/login', loginRouter);
 app.use('/api/v1/profile', profileRouter);
 app.use('/api/v1/upload', uploadRouter);

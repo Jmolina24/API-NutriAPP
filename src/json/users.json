@@ -1,0 +1,15 @@
+[
+  {
+    "id": "ae0d19c1-d503-4b40-a55d-08d13e2576b2",
+    "nombre": "Jair",
+    "apellido": "Molina",
+    "tipo_documento": "CC",
+    "num_documento": "1143450658",
+    "email": "jairmolina51@gmail.com",
+    "telefono": "3242047574",
+    "user": "Admin",
+    "password": "Admin",
+    "createdAt": "2026-06-20T21:35:23.742Z",
+    "updatedAt": "2026-06-20T21:35:23.742Z"
+  }
+]

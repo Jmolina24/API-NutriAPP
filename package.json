@@ -12,6 +12,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@babel/runtime": "^8.0.0",
     "base64-stream": "^1.0.0",
     "basic-ftp": "^5.0.2",
     "cors": "^2.8.5",
@@ -35,10 +36,12 @@
     "uuid": "^9.0.0"
   },
   "devDependencies": {
-    "@babel/cli": "^7.21.5",
-    "@babel/core": "^7.21.8",
+    "@babel/cli": "^7.29.7",
+    "@babel/core": "^7.29.7",
+    "@babel/node": "^7.29.7",
     "@babel/plugin-transform-runtime": "^7.21.4",
-    "@babel/preset-env": "^7.21.5",
-    "i": "^0.3.7"
+    "@babel/preset-env": "^7.29.7",
+    "i": "^0.3.7",
+    "nodemon": "^3.1.14"
   }
 }
