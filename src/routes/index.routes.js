@@ -10,7 +10,7 @@ router.get('/api/v1/', (req, res) => {
     const data = {
         "Api": "Rest Api Nutrición",
         "Version": `${config.version}`,
-        "Year": "2022",
+        "Year": "2026",
         "Developer": "Desarrollado por UiiLab",
         "URL": "https://www.instagram.com/uiilab/"
     }
