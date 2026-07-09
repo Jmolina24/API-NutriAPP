@@ -1,4 +1,4 @@
-import {config} from 'dotenv';
+import { config } from 'dotenv';
 config();
 
 export default {
@@ -7,6 +7,12 @@ export default {
     dbPassword: process.env.DB_PASSWORD || '',
     dbDatabase: process.env.DB_DATABASE || '',
     dbServer: process.env.DB_SERVER || '',
+    dbUserNord: process.env.MYSQL_USER_NORD || '',
+    dbPasswordNord: process.env.MYSQL_PASSWORD_NORD || '',
+    dbDatabaseNord: process.env.MYSQL_DATABASE_NORD || '',
+    dbServerNord: process.env.MYSQL_SERVER_NORD || '',
+    dbPortNord: process.env.MYSQL_DATABASE_PORT || '',
+    dbRootPassword: process.env.MYSQL_ROOT_PASSWORD || '',
     mailUser: process.env.USER_MAIL || '',
     mailPass: process.env.PASS_MAIL || '',
     hostPass: process.env.HOST_MAIL || '',
@@ -16,5 +22,5 @@ export default {
     ftpUser: process.env.FTP_USER || '',
     ftpPassword: process.env.FTP_PASSWORD || '',
     jwtSecret: process.env.JWT_SECRET || '',
-    version: '3.2.0'    
+    version: '3.2.0'
 }
