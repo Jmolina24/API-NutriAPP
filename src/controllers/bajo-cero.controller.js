@@ -145,48 +145,48 @@ export const putServicesController = async (req, res) => {
 
     try {
 
-        if ( !icon || !color || !title || !desc || !Array.isArray(items) || items.length === 0 || typeof active !== "boolean" ) {
+        if (!icon || !color || !title || !desc || !Array.isArray(items) || items.length === 0 || typeof active !== "boolean") {
             return res.status(400).json({ code: "1", message: "Datos inválidos" });
         }
 
         const poolNord = await getConnectionBDNord();
         // Validar que el servicio exista
-        poolNord.execute( "SELECT id FROM services WHERE id = ?", [id], (err, rows) => {
+        poolNord.execute("SELECT id FROM services WHERE id = ?", [id], (err, rows) => {
 
-                if (err) { 
+            if (err) {
+                return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+            }
+
+            if (rows.length === 0) {
+                return res.status(404).json({ code: "1", message: "Servicio no encontrado" });
+            }
+
+            // Validar que no exista otro servicio con el mismo título
+            poolNord.execute(`SELECT id FROM services WHERE LOWER(title) = LOWER(?) AND id <> ?`, [title, id], (err, rowsTitle) => {
+
+                if (err) {
                     return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
                 }
 
-                if (rows.length === 0) {
-                    return res.status(404).json({ code: "1", message: "Servicio no encontrado" });
+                if (rowsTitle.length > 0) {
+                    return res.status(409).json({ code: "1", message: "Ya existe un servicio con ese título." });
                 }
 
-                // Validar que no exista otro servicio con el mismo título
-                poolNord.execute( `SELECT id FROM services WHERE LOWER(title) = LOWER(?) AND id <> ?`, [title, id], (err, rowsTitle) => {
+                // Actualizar
+                poolNord.execute(`UPDATE services SET icon = ?, color = ?, title = ?, \`desc\` = ?, items = ?, active = ?, updatedAt = NOW() WHERE id = ?`, [icon, color, title, desc, JSON.stringify(items), active, id],
+                    (err) => {
 
                         if (err) {
                             return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
                         }
-
-                        if (rowsTitle.length > 0) { 
-                            return res.status(409).json({ code: "1", message: "Ya existe un servicio con ese título." });
-                        }
-
-                        // Actualizar
-                        poolNord.execute( `UPDATE services SET icon = ?, color = ?, title = ?, \`desc\` = ?, items = ?, active = ?, updatedAt = NOW() WHERE id = ?`, [ icon, color, title, desc, JSON.stringify(items), active, id ],
-                            (err) => {
-
-                                if (err) {
-                                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
-                                }
-                                return res.status(200).json({ code: "0", message: "Servicio actualizado correctamente", data: { id, icon, color, title, desc, items, active } });
-                            }
-                        );
-
+                        return res.status(200).json({ code: "0", message: "Servicio actualizado correctamente", data: { id, icon, color, title, desc, items, active } });
                     }
                 );
 
             }
+            );
+
+        }
         );
 
     } catch (error) {
@@ -211,29 +211,30 @@ export const toggleServicesController = async (req, res) => {
 
         const poolNord = await getConnectionBDNord();
 
-        poolNord.execute( `SELECT id, active FROM services WHERE id = ?`, [id], (err, rows) => {
+        poolNord.execute(`SELECT id, active FROM services WHERE id = ?`, [id], (err, rows) => {
+
+            if (err) {
+                return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+            }
+
+            if (rows.length === 0) {
+                return res.status(404).json({ code: "1", message: "Servicio no encontrado" });
+            }
+
+            const active = rows[0].active ? 0 : 1;
+
+            poolNord.execute(`UPDATE services SET active = ?, updatedAt = NOW() WHERE id = ?`, [active, id], (err) => {
 
                 if (err) {
                     return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
                 }
 
-                if (rows.length === 0) {
-                    return res.status(404).json({ code: "1", message: "Servicio no encontrado" });
-                }
-
-                const active = rows[0].active ? 0 : 1;
-
-                poolNord.execute( `UPDATE services SET active = ?, updatedAt = NOW() WHERE id = ?`, [active, id], (err) => {
-
-                        if (err) {
-                            return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
-                        }
-
-                        return res.status(200).json({ code: "0", message: "Estado del servicio actualizado correctamente", data: { id, active: Boolean(active) }
-                        });
-                    }
-                );
+                return res.status(200).json({
+                    code: "0", message: "Estado del servicio actualizado correctamente", data: { id, active: Boolean(active) }
+                });
             }
+            );
+        }
         );
 
     } catch (error) {
@@ -250,26 +251,26 @@ export const deleteServicesController = async (req, res) => {
         const poolNord = await getConnectionBDNord();
 
         // Validar que el servicio exista
-        poolNord.execute( `SELECT * FROM services WHERE id = ?`, [id], (err, rows) => {
+        poolNord.execute(`SELECT * FROM services WHERE id = ?`, [id], (err, rows) => {
 
+            if (err) {
+                return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+            }
+
+            if (rows.length === 0) {
+                return res.status(404).json({ code: "1", message: "Servicio no encontrado" });
+            }
+            const deletedService = rows[0];
+            // Eliminar servicio
+            poolNord.execute(`DELETE FROM services WHERE id = ?`, [id], (err) => {
                 if (err) {
                     return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
                 }
-
-                if (rows.length === 0) {
-                    return res.status(404).json({ code: "1", message: "Servicio no encontrado" });
-                }
-                const deletedService = rows[0];
-                // Eliminar servicio
-                poolNord.execute( `DELETE FROM services WHERE id = ?`, [id], (err) => {
-                        if (err) {
-                            return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
-                        }
-                        return res.status(200).json({ code: "0", message: "Servicio eliminado correctamente", data: deletedService });
-                    }
-                );
-
+                return res.status(200).json({ code: "0", message: "Servicio eliminado correctamente", data: deletedService });
             }
+            );
+
+        }
         );
 
     } catch (error) {
@@ -278,47 +279,56 @@ export const deleteServicesController = async (req, res) => {
     }
 };
 
-/// por aqui voy
+
 export const listStepsController = async (req, res) => {
     try {
-        const services = JSON.parse(await fs.readFile('./src/json/seccion.json', 'utf8'));
-        return res.status(200).json({ code: "0", message: "Lista de secciones obtenida correctamente", data: services });
+        const poolNord = await getConnectionBDNord();
+        poolNord.execute('SELECT * FROM seccion', [], async function (err, rows, fields) {
+            if (err) {
+                return res.status(511).send({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+            }
+            const result = rows;
+            await poolNord.end();
+            return res.status(200).json({ code: "0", message: "Lista de secciones obtenida correctamente", data: result });
+        })
     } catch (error) {
+        // await poolNord.end();
         return res.status(500).json({ code: "1", message: "Internal Server Error", error: "listStepsController", details: error });
     }
 }
 
-
 export const createStepsController = async (req, res) => {
 
     const { num, icon, title, descripcion } = req.body;
-
     try {
         if (!num || !icon || !title || !descripcion) {
             return res.status(400).json({ code: "1", message: "Datos inválidos" });
         }
 
-        let services = JSON.parse(await fs.readFile('./src/json/seccion.json', 'utf8'));
-        const existingSeccion = services.find(service => service.title.toLowerCase() === title.toLowerCase() || service.num === num);
-        if (existingSeccion) {
-            return res.status(409).json({ code: "1", message: "La sección ya existe" });
-        }
+        const poolNord = await getConnectionBDNord();
 
-        const newSeccion = {
-            id: crypto.randomUUID(),
-            num,
-            icon,
-            title,
-            descripcion,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
+        // Validar que la sección no exista
+        poolNord.execute( `SELECT id FROM seccion WHERE LOWER(title) = LOWER(?) OR num = ?`, [title, num], (err, rows) => {
+            if (err) {
+                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                }
 
-        services.push(newSeccion);
-        await fs.writeFile('./src/json/seccion.json', JSON.stringify(services, null, 2), 'utf8');
-        return res.status(201).json({ code: "0", message: "Sección creada correctamente", data: newSeccion });
+                if (rows.length > 0) {
+                    return res.status(409).json({ code: "1", message: "La sección ya existe" });
+                }
 
+                const id = crypto.randomUUID();
 
+                poolNord.execute( `INSERT INTO seccion ( id, num, icon, title, descripcion, createdAt, updatedAt ) VALUES (?, ?, ?, ?, ?, NOW(), NOW())`, [ id, num, icon, title, descripcion ], (err) => {
+                    if (err) { 
+                        return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                        }
+
+                        return res.status(201).json({ code: "0", message: "Sección creada correctamente", data: { id, num, icon, title, descripcion } });
+                    }
+                );
+            }
+        );
     } catch (error) {
         return res.status(500).json({ code: "1", message: "Internal Server Error", error: "createStepsController", details: error });
     }
@@ -328,59 +338,86 @@ export const putStepsController = async (req, res) => {
 
     const { id } = req.params;
     const { num, icon, title, descripcion } = req.body;
-
     try {
-
-        if (!num || !icon || !title || !descripcion) {
-            return res.status(400).json({ code: "1", message: "Datos inválidos" });
+        if (!num || !icon || !title || !descripcion) { 
+            return res.status(400).json({ code: "1", message: "Datos inválidos"
+            });
         }
 
-        let secciones = JSON.parse(await fs.readFile('./src/json/seccion.json', 'utf8'));
+        const poolNord = await getConnectionBDNord();
 
-        const index = secciones.findIndex(section => section.id === id);
+        // Validar que la sección exista
+        poolNord.execute( `SELECT id FROM seccion WHERE id = ?`, [id], (err, rows) => {
 
-        if (index === -1) {
-            return res.status(404).json({ code: "1", message: "Sección no encontrada" });
-        }
+                if (err) {
+                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                }
 
-        const updatedSection = {
-            ...secciones[index],
-            num,
-            icon,
-            title,
-            descripcion,
-            updatedAt: new Date().toISOString()
-        };
+                if (rows.length === 0) {
+                    return res.status(404).json({ code: "1", message: "Sección no encontrada" });
+                }
 
-        secciones[index] = updatedSection;
+                // Validar que no exista otra sección con el mismo título o número
+                poolNord.execute( `SELECT id FROM seccion WHERE (LOWER(title) = LOWER(?) OR num = ?) AND id <> ?`, [title, num, id], (err, rowsSection) => {
 
-        await fs.writeFile('./src/json/seccion.json', JSON.stringify(secciones, null, 2), 'utf8');
+                        if (err) {
+                            return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                        }
 
-        return res.status(200).json({ code: "0", message: "Sección actualizada correctamente", data: updatedSection });
+                        if (rowsSection.length > 0) {
+                            return res.status(409).json({ code: "1", message: "Ya existe una sección registrada con ese título o número." });
+                        }
+
+                        // Actualizar sección
+                        poolNord.execute( `UPDATE seccion SET num = ?, icon = ?, title = ?, descripcion = ?, updatedAt = NOW() WHERE id = ?`, [ num, icon, title, descripcion, id ],
+                            (err) => {
+
+                                if (err) {
+                                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                                }
+                                return res.status(200).json({ code: "0", message: "Sección actualizada correctamente", data: { id, num, icon, title, descripcion }
+                                });
+                            }
+                        );
+                    }
+                );
+            }
+        );
 
     } catch (error) {
         return res.status(500).json({ code: "1", message: "Internal Server Error", error: "putStepsController", details: error });
     }
-}
+};
 
 
 export const deleteStepsController = async (req, res) => {
+
     const { id } = req.params;
-
     try {
-        let secciones = JSON.parse(await fs.readFile('./src/json/seccion.json', 'utf8'));
-        const index = secciones.findIndex(section => section.id === id);
 
-        if (index === -1) {
-            return res.status(404).json({ code: "1", message: "Sección no encontrada" });
-        }
+        const poolNord = await getConnectionBDNord();
 
-        const deletedService = secciones[index];
-        secciones.splice(index, 1);
-        await fs.writeFile('./src/json/seccion.json', JSON.stringify(secciones, null, 2), 'utf8');
+        // Validar que la sección exista
+        poolNord.execute( `SELECT * FROM seccion WHERE id = ?`, [id], (err, rows) => {
+                if (err) {
+                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                }
+                if (rows.length === 0) {
+                    return res.status(404).json({ code: "1", message: "Sección no encontrada" });
+                }
+                const deletedSection = rows[0];
+                // Eliminar sección
+                poolNord.execute( `DELETE FROM seccion WHERE id = ?`, [id],
+                    (err) => {
 
-        return res.status(200).json({ code: "0", message: "Sección eliminada correctamente", data: deletedService });
-
+                        if (err) {
+                            return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                        }
+                        return res.status(200).json({ code: "0", message: "Sección eliminada correctamente", data: deletedSection });
+                    }
+                );
+            }
+        );
     } catch (error) {
         return res.status(500).json({ code: "1", message: "Internal Server Error", error: "deleteStepsController", details: error });
     }
@@ -389,9 +426,17 @@ export const deleteStepsController = async (req, res) => {
 
 export const listContactController = async (req, res) => {
     try {
-        const services = JSON.parse(await fs.readFile('./src/json/contact.json', 'utf8'));
-        return res.status(200).json({ code: "0", message: "Lista de contactos obtenida correctamente", data: services });
+        const poolNord = await getConnectionBDNord();
+        poolNord.execute('SELECT * FROM contact', [], async function (err, rows, fields) {
+            if (err) {
+                return res.status(511).send({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+            }
+            const result = rows;
+            await poolNord.end();
+            return res.status(200).json({ code: "0", message: "Lista de contactos obtenida correctamente", data: result });
+        })
     } catch (error) {
+        // await poolNord.end();
         return res.status(500).json({ code: "1", message: "Internal Server Error", error: "listContactController", details: error });
     }
 }
@@ -401,37 +446,37 @@ export const putContactController = async (req, res) => {
 
     const { id } = req.params;
     const { whatsapp, phone, email, city, schedule } = req.body;
-    try {
 
+    try {
         if (!whatsapp || !phone || !email || !city || !schedule) {
             return res.status(400).json({ code: "1", message: "Datos inválidos" });
         }
 
-        let contact = JSON.parse(await fs.readFile('./src/json/contact.json', 'utf8'));
+        const poolNord = await getConnectionBDNord();
 
-        const index = contact.findIndex(item => item.id === id);
+        // Validar que el contacto exista
+        poolNord.execute( `SELECT * FROM contact WHERE id = ?`, [id], (err, rows) => {
 
-        if (index === -1) {
-            return res.status(404).json({ code: "1", message: "Contacto no encontrado" });
-        }
+                if (err) {
+                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                }
 
-        const updatedSection = {
-            ...contact[index],
-            whatsapp,
-            phone,
-            email,
-            city,
-            schedule,
-            updatedAt: new Date().toISOString()
-        };
+                if (rows.length === 0) {
+                    return res.status(404).json({ code: "1", message: "Contacto no encontrado" });
+                }
 
-        contact[index] = updatedSection;
+                // Actualizar contacto
+                poolNord.execute( `UPDATE contact SET whatsapp = ?, phone = ?, email = ?, city = ?, schedule = ?, updatedAt = NOW() WHERE id = ?`, [ whatsapp, phone, email, city, schedule, id ], (err) => {
+                    if (err) {
+                            return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                        }
 
-        await fs.writeFile('./src/json/contact.json', JSON.stringify(contact, null, 2), 'utf8');
-
-        return res.status(200).json({ code: "0", message: "Contacto actualizado correctamente", data: updatedSection });
-
+                        return res.status(200).json({ code: "0", message: "Contacto actualizado correctamente", data: { id, whatsapp, phone, email, city, schedule } });
+                    }
+                );
+            }
+        );
     } catch (error) {
         return res.status(500).json({ code: "1", message: "Internal Server Error", error: "putContactController", details: error });
     }
-}
+};
