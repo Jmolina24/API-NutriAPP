@@ -22,5 +22,5 @@ export default {
     ftpUser: process.env.FTP_USER || '',
     ftpPassword: process.env.FTP_PASSWORD || '',
     jwtSecret: process.env.JWT_SECRET || '',
-    version: '4.0.0'
+    version: '4.1.1'
 }
