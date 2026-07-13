@@ -1,7 +1,11 @@
-import fs from 'fs/promises';
+import { getConnectionFTP, getConnectionBDNord} from '../database';
+//import fs from 'fs/promises';
 import crypto from 'crypto';
-import { getConnectionBDNord } from '../database';
+
 const { tokenSign } = require('../middleware/tokeAuth');
+import { v4 as uuidv4 } from 'uuid';
+const fs = require('fs');
+const path = require('path');
 
 export const createUserController = async (req, res) => {
 
@@ -87,7 +91,7 @@ export const listServicesController = async (req, res) => {
             }
             const result = rows;
             await poolNord.end();
-            return res.status(200).json({ code: "0", message: "Lista de servicios obtenida correctamente", data: result });
+            return res.status(200).json({ code: "0", message: "Lista de servicios obtenida correctamente", data: parseBoolean(result) });
         })
     } catch (error) {
         // await poolNord.end();
@@ -289,7 +293,7 @@ export const listStepsController = async (req, res) => {
             }
             const result = rows;
             await poolNord.end();
-            return res.status(200).json({ code: "0", message: "Lista de secciones obtenida correctamente", data: result });
+            return res.status(200).json({ code: "0", message: "Lista de secciones obtenida correctamente", data: parseBoolean(result) });
         })
     } catch (error) {
         // await poolNord.end();
@@ -441,7 +445,6 @@ export const listContactController = async (req, res) => {
     }
 }
 
-
 export const putContactController = async (req, res) => {
 
     const { id } = req.params;
@@ -479,4 +482,240 @@ export const putContactController = async (req, res) => {
     } catch (error) {
         return res.status(500).json({ code: "1", message: "Internal Server Error", error: "putContactController", details: error });
     }
+};
+
+export const listHeroController = async (req, res) => {
+    try {
+        const poolNord = await getConnectionBDNord();
+        poolNord.execute('SELECT * FROM hero', [], async function (err, rows, fields) {
+            if (err) {
+                return res.status(511).send({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+            }
+            const result = rows;
+            await poolNord.end();
+            return res.status(200).json({ code: "0", message: "Lista de héroes obtenida correctamente", data: parseBoolean(result) });
+        })
+    } catch (error) {
+        // await poolNord.end();
+        return res.status(500).json({ code: "1", message: "Internal Server Error", error: "listHeroController", details: error });
+    }
+
+
+
+
+
+}
+
+export const putHeroController = async (req, res) => {
+
+    const { id } = req.params;
+    const { badge, headline, headlineHighlight, subtext, stats } = req.body;
+
+    try {
+
+        if ( !badge || !headline || !headlineHighlight || !subtext || !Array.isArray(stats) || stats.length === 0  || stats.some(stat => !stat.value || !stat.label ) ) {
+            return res.status(400).json({ code: "1", message: "Datos inválidos" });
+        }
+
+        const poolNord = await getConnectionBDNord();
+
+        // Validar que el Hero exista
+        poolNord.execute( `SELECT * FROM hero WHERE id = ?`, [id], (err, rows) => {
+
+                if (err) {
+                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                }
+
+                if (rows.length === 0) {
+                    return res.status(404).json({ code: "1", message: "Hero no encontrado" });
+                }
+                // Actualizar Hero
+                poolNord.execute( `UPDATE hero SET badge = ?, headline = ?, headlineHighlight = ?, subtext = ?, stats = ?, updatedAt = NOW() WHERE id = ?`, [ badge, headline, headlineHighlight, subtext, JSON.stringify(stats), id ], (err) => {
+                        if (err) {
+                            return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                        }
+
+                        return res.status(200).json({
+                            code: "0",
+                            message: "Hero actualizado correctamente",
+                            data: { id, badge, headline, headlineHighlight, subtext, stats }
+                        });
+                    }
+                );
+            }
+        );
+
+    } catch (error) {
+
+        return res.status(500).json({ code: "1", message: "Internal Server Error", error: "putHeroController", details: error });
+
+    }
+
+};
+
+
+export const listGalleryController = async (req, res) => {
+    const { category } = req.query;
+    try {
+        const poolNord = await getConnectionBDNord();
+        let query = "SELECT * FROM gallery WHERE active = '1' ";
+        let params = [];
+        if (category) { 
+            query += " AND category = ?"; 
+            params.push(category); 
+        }
+        poolNord.execute(query, params, function (err, rows) {
+            if (err) {
+                return res.status(511).send({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+            }
+            return res.status(200).json({ code: "0", message: "Lista de galería obtenida correctamente", data: parseBoolean(rows) });
+        });
+
+    } catch (error) {
+        return res.status(500).json({ code: "1", message: "Internal Server Error", error: "listGalleryController", details: error });
+    }
+};
+
+export const updateGalleryController = async (req, res) => {
+    const files = req.files;
+    console.log(files.length);
+    if (files.length == 0) {
+        return res.status(400).json({ codigo: 1, mensaje: 'Se Debe Cargar los documentos necesarios' });
+    }
+    const ftp = await getConnectionFTP();
+    ftp.on('ready', () => {
+        console.log('Conectado al servidor FTP');
+        const uploadFile = (file, callback) => {
+            const extension = path.extname(file.originalname).toLowerCase();
+            const uuid = uuidv4();
+            const serverFilename = `${uuid}${extension}`;
+            const readStream = fs.createReadStream(file.path);
+            switch (extension) {
+                case '.pdf':
+                    var remotoDirFTP = '/uploads/' + serverFilename;
+                    break;
+                case '.jpg':
+                case '.jpeg':
+                case '.png':
+                case '.tif':
+                case '.tiff':
+                    var remotoDirFTP = '/uploads/' + serverFilename;
+                    break;
+                default:
+                    var remotoDirFTP = '/uploads/' + serverFilename;
+                    break;
+            }
+            ftp.put(readStream, remotoDirFTP, (err) => {
+                if (err) {
+                    console.log('Error al subir el archivo', err);
+                    callback(err);
+                } else {
+                    console.log(`Archivo ${serverFilename} subido con éxito`);
+                    callback(null, {
+                        fieldname: file.fieldname,
+                        originalname: file.originalname,
+                        encoding: file.encoding,
+                        mimetype: file.mimetype,
+                        destination: file.destination,
+                        filename: serverFilename,
+                        path: remotoDirFTP,
+                        size: file.size
+                    });
+                }
+                fs.unlinkSync(file.path); // eliminar archivo en uploads
+            });
+        };
+
+        const uploadFiles = (files, callback) => {
+            if (files.length === 0) {
+                callback(null, []);
+                return;
+            }
+
+            const file = files.shift();
+            uploadFile(file, (err, data) => {
+                if (err) {
+                    callback(err);
+                } else {
+                    uploadFiles(files, (err, results) => {
+                        if (err) {
+                            callback(err);
+                        } else {
+                            results.unshift(data);
+                            callback(null, results);
+                        }
+                    });
+                }
+            });
+        };
+
+        uploadFiles(files, (err, results) => {
+            ftp.end();
+            console.log('Desconectado del servidor FTP');
+            if (err) {
+                console.error(err);
+                res.status(400).json({ codigo: 1, mensaje: 'Error al subir el archivo' });
+            } else {
+                res.status(200).json({ codigo: 0, mensaje: 'Archivos subidos con éxito', rutas: results });
+            }
+        });
+    });
+
+    ftp.on('error', (err) => {
+        console.log('Error', err);
+        res.status(400).json({ codigo: 1, mensaje: 'Error al subir el archivo' });
+    });
+
+};
+
+
+export const deleteGalleryController = async (req, res) => {
+    const { id } = req.params;
+    try {
+        const poolNord = await getConnectionBDNord();
+
+        // Validar que la sección exista
+        poolNord.execute( `SELECT * FROM gallery WHERE id = ?`, [id], (err, rows) => {
+                if (err) {
+                    return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                }
+                if (rows.length === 0) {
+                    return res.status(404).json({ code: "1", message: "Galería no encontrada" });
+                }
+                const deletedSection = rows[0];
+                // Eliminar sección
+                poolNord.execute( `UPDATE gallery SET active = 0 WHERE id = ?`, [id],
+                    (err) => {
+                        if (err) {
+                            return res.status(511).json({ mensaje: "Error Query BD", codigo: "1", mensaje_bd: err });
+                        }
+                        return res.status(200).json({ code: "0", message: "Galería eliminada correctamente", data: parseBoolean(deletedSection) });
+                    }
+                );
+            }
+        );
+    } catch (error) {
+        return res.status(500).json({ code: "1", message: "Internal Server Error", error: "deleteGalleryController", details: error });
+    }
+
+}
+
+const parseBoolean = (data, fields = ['active']) => {
+    if (!data) return data;
+
+    const parse = (item) => {
+        const result = { ...item };
+
+        fields.forEach(field => {
+            if (field in result) {
+                result[field] = Boolean(result[field]);
+            }
+        });
+
+        return result;
+    };
+
+    return Array.isArray(data)
+        ? data.map(parse)
+        : parse(data);
 };
